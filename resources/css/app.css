@@ -1,0 +1,289 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../views';
+@source '../js';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Mendaftarkan token desain bersama untuk palet, radius, dan komponen aplikasi. */
+@theme {
+    --font-sans:
+        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    --color-white: #fffdf7;
+    --color-black: #14201d;
+    --color-gray-50: #faf8f1;
+    --color-gray-100: #f2efe5;
+    --color-gray-200: #e5e1d5;
+    --color-gray-300: #d3cfc2;
+    --color-gray-400: #77766c;
+    --color-gray-500: #6e6d63;
+    --color-gray-600: #5e5d54;
+    --color-gray-700: #464740;
+    --color-gray-800: #153e3a;
+    --color-gray-900: #202c28;
+    --color-gray-950: #14201d;
+    --color-neutral-50: #faf8f1;
+    --color-neutral-100: #f2efe5;
+    --color-neutral-200: #e5e1d5;
+    --color-neutral-300: #d3cfc2;
+    --color-neutral-400: #aaa79b;
+    --color-neutral-500: #6e6d63;
+    --color-neutral-600: #5e5d54;
+    --color-neutral-700: #464740;
+    --color-neutral-800: #303b36;
+    --color-neutral-900: #202c28;
+    --color-neutral-950: #14201d;
+    --color-zinc-900: #153e3a;
+    --color-indigo-50: #eaf3ef;
+    --color-indigo-100: #d5e7df;
+    --color-indigo-200: #b2d4c7;
+    --color-indigo-300: #8abdab;
+    --color-indigo-400: #5d9f89;
+    --color-indigo-500: #3c806d;
+    --color-indigo-600: #2b695a;
+    --color-indigo-700: #1e5148;
+    --color-indigo-800: #153e3a;
+    --color-indigo-900: #12332f;
+    --color-indigo-950: #0c2421;
+    --color-blue-50: #fff3ec;
+    --color-blue-100: #ffe4d7;
+    --color-blue-200: #f9c9b2;
+    --color-blue-300: #eda78a;
+    --color-blue-400: #dc8261;
+    --color-blue-500: #c96547;
+    --color-blue-600: #ab5038;
+    --color-blue-700: #88402f;
+    --color-blue-800: #683328;
+    --color-blue-900: #4a2822;
+    --color-blue-950: #301b17;
+    --color-petrol-50: #eaf3ef;
+    --color-petrol-100: #d5e7df;
+    --color-petrol-200: #b2d4c7;
+    --color-petrol-300: #8abdab;
+    --color-petrol-400: #5d9f89;
+    --color-petrol-500: #3c806d;
+    --color-petrol-600: #2b695a;
+    --color-petrol-700: #1e5148;
+    --color-petrol-800: #153e3a;
+    --color-petrol-900: #12332f;
+    --color-petrol-950: #0c2421;
+    --color-clay-50: #fff3ec;
+    --color-clay-100: #ffe4d7;
+    --color-clay-200: #f9c9b2;
+    --color-clay-300: #eda78a;
+    --color-clay-400: #dc8261;
+    --color-clay-500: #c96547;
+    --color-clay-600: #ab5038;
+    --color-clay-700: #88402f;
+    --color-clay-800: #683328;
+    --color-clay-900: #4a2822;
+    --color-clay-950: #301b17;
+    --color-citron-50: #fbfbe9;
+    --color-citron-100: #f2f3d0;
+    --color-citron-200: #e7e9b2;
+    --color-citron-300: #d9de8d;
+    --color-citron-400: #c5ce69;
+    --color-citron-500: #aab64e;
+    --color-citron-600: #87933c;
+    --color-citron-700: #687231;
+    --color-citron-800: #50592b;
+    --color-citron-900: #404927;
+    --color-citron-950: #222812;
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* Menentukan warna tema terang sebagai nilai dasar antarmuka. */
+:root {
+    --background: #f6f3e9;
+    --foreground: #202c28;
+    --card: #fffdf7;
+    --card-foreground: #202c28;
+    --popover: #fffdf7;
+    --popover-foreground: #202c28;
+    --primary: #153e3a;
+    --primary-foreground: #fffdf7;
+    --secondary: #e9eee5;
+    --secondary-foreground: #234840;
+    --muted: #f0ede3;
+    --muted-foreground: #686a60;
+    --accent: #e7e9b2;
+    --accent-foreground: #303923;
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(0.577 0.245 27.325);
+    --border: #e3dfd2;
+    --input: #e3dfd2;
+    --ring: #5d9f89;
+    --chart-1: oklch(0.646 0.222 41.116);
+    --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.398 0.07 227.392);
+    --chart-4: oklch(0.828 0.189 84.429);
+    --chart-5: oklch(0.769 0.188 70.08);
+    --radius: 0.625rem;
+    --sidebar: #fffdf7;
+    --sidebar-foreground: #202c28;
+    --sidebar-primary: #153e3a;
+    --sidebar-primary-foreground: #fffdf7;
+    --sidebar-accent: #eaf3ef;
+    --sidebar-accent-foreground: #153e3a;
+    --sidebar-border: #e3dfd2;
+    --sidebar-ring: #5d9f89;
+}
+
+/* Mengganti token warna saat tema gelap diaktifkan. */
+.dark {
+    --background: #17231f;
+    --foreground: #f3f0e5;
+    --card: #202e29;
+    --card-foreground: #f3f0e5;
+    --popover: #202e29;
+    --popover-foreground: #f3f0e5;
+    --primary: #c6d17a;
+    --primary-foreground: #1b2b25;
+    --secondary: #2a3933;
+    --secondary-foreground: #e5eadc;
+    --muted: #2a3933;
+    --muted-foreground: #b3bbae;
+    --accent: #394631;
+    --accent-foreground: #eff2d5;
+    --destructive: oklch(0.396 0.141 25.723);
+    --destructive-foreground: oklch(0.637 0.237 25.331);
+    --border: #39463f;
+    --input: #39463f;
+    --ring: #92ae9b;
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+    --sidebar: #1b2924;
+    --sidebar-foreground: #f3f0e5;
+    --sidebar-primary: #c6d17a;
+    --sidebar-primary-foreground: #1b2b25;
+    --sidebar-accent: #2a3933;
+    --sidebar-accent-foreground: #e5eadc;
+    --sidebar-border: #39463f;
+    --sidebar-ring: #92ae9b;
+}
+
+/* Menetapkan gaya dasar elemen dan interaksi konsisten di seluruh halaman. */
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        background-image: radial-gradient(
+            circle at 90% 0%,
+            rgb(217 222 141 / 12%),
+            transparent 28rem
+        );
+        font-feature-settings: 'ss01' on;
+    }
+
+    input:not([type='checkbox']):not([type='radio']),
+    select,
+    textarea {
+        border-radius: var(--radius-md);
+        border-color: var(--input);
+        background-color: var(--card);
+    }
+
+    a,
+    button,
+    input,
+    select,
+    textarea {
+        @apply transition-colors duration-200;
+    }
+
+    :focus-visible {
+        outline: 3px solid var(--ring);
+        outline-offset: 3px;
+    }
+
+    table tbody tr {
+        transition: background-color 180ms ease;
+    }
+
+    table tbody tr:hover {
+        background-color: color-mix(
+            in srgb,
+            var(--background) 78%,
+            var(--accent)
+        );
+    }
+
+    table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    table thead th {
+        letter-spacing: 0.08em;
+    }
+}
+
+/* Mengurangi animasi ketika pengguna meminta gerakan antarmuka diminimalkan. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
