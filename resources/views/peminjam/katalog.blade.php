@@ -25,9 +25,13 @@
             <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 @forelse ($alat as $item)
                     <article class="group flex flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-petrol-900/5">
-                        <div class="relative flex h-32 items-end overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-citron-100 p-5">
+                        <div class="relative flex h-48 items-end overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-citron-100 p-5">
+                            @if ($item->image_path)
+                                <img src="{{ Storage::disk('public')->url($item->image_path) }}" alt="Gambar {{ $item->nama_alat }}" class="absolute inset-0 h-full w-full object-cover">
+                                <span class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></span>
+                            @endif
                             <span class="absolute -right-7 -top-10 h-36 w-36 rounded-full border-[20px] border-white/60 transition-transform duration-500 group-hover:scale-110"></span>
-                            <span class="relative inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 text-xs font-semibold text-indigo-800 shadow-sm backdrop-blur">
+                            <span class="relative inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-indigo-800 shadow-sm backdrop-blur">
                                 <span class="h-1.5 w-1.5 rounded-full bg-clay-500"></span>
                                 {{ $item->kategori->nama_kategori }}
                             </span>

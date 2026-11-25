@@ -13,7 +13,7 @@ class Alat extends Model
     protected $table = 'alat';
 
     /** Menentukan atribut alat yang boleh diisi melalui mass assignment. */
-    protected $fillable = ['kategori_id', 'nama_alat', 'stok', 'kondisi'];
+    protected $fillable = ['kategori_id', 'nama_alat', 'stok', 'kondisi', 'image_path'];
 
     /** Mengambil kategori yang menaungi alat ini. */
     public function kategori(): BelongsTo

@@ -139,4 +139,135 @@ class PeminjamanWorkflow
             return (float) $pengembalian->fresh()->denda;
         });
     }
+
+    /** Memperbarui pengembalian selesai sambil menyesuaikan stok untuk perubahan kondisi. */
+    public function perbaruiPengembalian(
+        Pengembalian $pengembalian,
+        string $tanggal,
+        array $kondisiKembali,
+        float $dendaKerusakan,
+        ?string $catatan = null,
+    ): float {
+        return DB::transaction(function () use (
+            $pengembalian,
+            $tanggal,
+            $kondisiKembali,
+            $dendaKerusakan,
+            $catatan,
+        ): float {
+            $pengembalian = Pengembalian::query()->lockForUpdate()->findOrFail($pengembalian->id);
+            $peminjaman = Peminjaman::query()->lockForUpdate()->findOrFail($pengembalian->peminjaman_id);
+
+            if ($peminjaman->status !== 'dikembalikan') {
+                throw ValidationException::withMessages([
+                    'pengembalian' => 'Catatan ini tidak terhubung dengan peminjaman berstatus dikembalikan.',
+                ]);
+            }
+
+            $peminjaman->load('detail');
+            $idDetailValid = $peminjaman->detail->modelKeys();
+            $idDetailDikirim = array_map('intval', array_keys($kondisiKembali));
+
+            if (count($idDetailDikirim) !== count($idDetailValid)
+                || array_diff($idDetailDikirim, $idDetailValid)) {
+                throw ValidationException::withMessages([
+                    'detail' => 'Data kondisi barang tidak sesuai dengan peminjaman ini.',
+                ]);
+            }
+
+            $adaMasalah = false;
+            foreach ($peminjaman->detail as $detail) {
+                $kondisi = $kondisiKembali[$detail->id]['kondisi_kembali'] ?? null;
+
+                if (! in_array($kondisi, ['Baik', 'Rusak Ringan', 'Rusak Berat', 'Hilang'], true)) {
+                    throw ValidationException::withMessages([
+                        'detail' => 'Pilih kondisi untuk setiap barang yang dikembalikan.',
+                    ]);
+                }
+
+                $stokSebelumnyaTersedia = $detail->kondisi_kembali === 'Baik';
+                $stokBaruTersedia = $kondisi === 'Baik';
+
+                if ($stokSebelumnyaTersedia !== $stokBaruTersedia) {
+                    $alat = Alat::query()->lockForUpdate()->findOrFail($detail->alat_id);
+
+                    if ($stokSebelumnyaTersedia) {
+                        if ($alat->stok < $detail->jumlah) {
+                            throw ValidationException::withMessages([
+                                'detail' => "Stok {$alat->nama_alat} tidak cukup untuk mengubah kondisi pengembalian.",
+                            ]);
+                        }
+
+                        $alat->decrement('stok', $detail->jumlah);
+                    } else {
+                        $alat->increment('stok', $detail->jumlah);
+                    }
+                }
+
+                $detail->update(['kondisi_kembali' => $kondisi]);
+                $adaMasalah = $adaMasalah || ! $stokBaruTersedia;
+            }
+
+            if (! $adaMasalah && $dendaKerusakan > 0) {
+                throw ValidationException::withMessages([
+                    'denda_kerusakan' => 'Denda kerusakan hanya dapat dicatat jika ada barang rusak atau hilang.',
+                ]);
+            }
+            if ($dendaKerusakan > 0 && blank($catatan)) {
+                throw ValidationException::withMessages([
+                    'catatan' => 'Jelaskan alasan denda kerusakan atau kehilangan.',
+                ]);
+            }
+
+            $hariTerlambat = max(0, (int) Carbon::parse($peminjaman->tanggal_kembali_rencana)
+                ->diffInDays(Carbon::parse($tanggal), false));
+            $denda = ($hariTerlambat * 5000) + $dendaKerusakan;
+
+            $pengembalian->update([
+                'tanggal_dikembalikan' => $tanggal,
+                'denda' => $denda,
+                'denda_kerusakan' => $dendaKerusakan,
+                'catatan' => $catatan,
+            ]);
+            LogAktivitas::catat("Admin memperbarui pengembalian peminjaman #{$peminjaman->id}");
+
+            return (float) $pengembalian->fresh()->denda;
+        });
+    }
+
+    /** Menghapus pengembalian selesai dan mengembalikan transaksi ke status menunggu. */
+    public function hapusPengembalian(Pengembalian $pengembalian): void
+    {
+        DB::transaction(function () use ($pengembalian): void {
+            $pengembalian = Pengembalian::query()->lockForUpdate()->findOrFail($pengembalian->id);
+            $peminjaman = Peminjaman::query()->lockForUpdate()->findOrFail($pengembalian->peminjaman_id);
+
+            if ($peminjaman->status !== 'dikembalikan') {
+                throw ValidationException::withMessages([
+                    'pengembalian' => 'Hanya pengembalian yang sudah selesai yang dapat dihapus.',
+                ]);
+            }
+
+            $peminjaman->load('detail');
+            foreach ($peminjaman->detail as $detail) {
+                if ($detail->kondisi_kembali === 'Baik') {
+                    $alat = Alat::query()->lockForUpdate()->findOrFail($detail->alat_id);
+
+                    if ($alat->stok < $detail->jumlah) {
+                        throw ValidationException::withMessages([
+                            'pengembalian' => "Stok {$alat->nama_alat} tidak cukup untuk membatalkan pengembalian.",
+                        ]);
+                    }
+
+                    $alat->decrement('stok', $detail->jumlah);
+                }
+
+                $detail->update(['kondisi_kembali' => null]);
+            }
+
+            $peminjaman->update(['status' => 'menunggu_kembali']);
+            LogAktivitas::catat("Admin menghapus pengembalian peminjaman #{$peminjaman->id}");
+            $pengembalian->delete();
+        });
+    }
 }

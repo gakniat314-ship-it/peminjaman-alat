@@ -8,8 +8,12 @@ use App\Models\Kategori;
 use App\Models\LogAktivitas;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use RuntimeException;
+use Throwable;
 
 class AlatController extends Controller
 {
@@ -36,7 +40,16 @@ class AlatController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);
-        $alat = Alat::create($data);
+        unset($data['gambar'], $data['hapus_gambar']);
+        $imagePath = $this->storeImage($request);
+
+        try {
+            $alat = DB::transaction(fn () => Alat::create([...$data, 'image_path' => $imagePath]));
+        } catch (Throwable $e) {
+            $this->deleteImage($imagePath);
+            throw $e;
+        }
+
         LogAktivitas::catat("Menambahkan alat #{$alat->id} ({$alat->nama_alat})");
 
         return redirect()->route('admin.alat.index')->with('success', 'Data alat berhasil ditambahkan.');
@@ -51,7 +64,30 @@ class AlatController extends Controller
     /** Memvalidasi dan menyimpan perubahan data alat. */
     public function update(Request $request, Alat $alat): RedirectResponse
     {
-        $alat->update($this->validated($request));
+        $data = $this->validated($request);
+        unset($data['gambar'], $data['hapus_gambar']);
+
+        $oldImagePath = $alat->image_path;
+        $newImagePath = $this->storeImage($request);
+        $hapusGambar = $request->boolean('hapus_gambar') && $newImagePath === null;
+
+        if ($newImagePath !== null) {
+            $data['image_path'] = $newImagePath;
+        } elseif ($hapusGambar) {
+            $data['image_path'] = null;
+        }
+
+        try {
+            DB::transaction(fn () => $alat->update($data));
+        } catch (Throwable $e) {
+            $this->deleteImage($newImagePath);
+            throw $e;
+        }
+
+        if (($newImagePath !== null || $hapusGambar) && $oldImagePath !== null) {
+            $this->deleteImage($oldImagePath);
+        }
+
         LogAktivitas::catat("Memperbarui alat #{$alat->id} ({$alat->nama_alat})");
 
         return redirect()->route('admin.alat.index')->with('success', 'Data alat berhasil diperbarui.');
@@ -65,7 +101,9 @@ class AlatController extends Controller
         }
 
         LogAktivitas::catat("Menghapus alat #{$alat->id} ({$alat->nama_alat})");
+        $imagePath = $alat->image_path;
         $alat->delete();
+        $this->deleteImage($imagePath);
 
         return back()->with('success', 'Data alat berhasil dihapus.');
     }
@@ -78,6 +116,32 @@ class AlatController extends Controller
             'nama_alat' => ['required', 'string', 'max:255'],
             'stok' => ['required', 'integer', 'min:0'],
             'kondisi' => ['required', 'string', Rule::in(['baik', 'rusak ringan', 'rusak berat'])],
+            'gambar' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            'hapus_gambar' => ['nullable', 'boolean'],
         ]);
+    }
+
+    /** Menyimpan gambar unggahan dan mengembalikan path disk publiknya. */
+    private function storeImage(Request $request): ?string
+    {
+        if (! $request->hasFile('gambar')) {
+            return null;
+        }
+
+        $path = $request->file('gambar')->store('alat', 'public');
+
+        if (! is_string($path) || $path === '') {
+            throw new RuntimeException('Gambar alat gagal disimpan.');
+        }
+
+        return $path;
+    }
+
+    /** Menghapus gambar dan melaporkan kegagalan filesystem secara eksplisit. */
+    private function deleteImage(?string $path): void
+    {
+        if ($path !== null && ! Storage::disk('public')->delete($path)) {
+            throw new RuntimeException('Gambar alat gagal dihapus dari penyimpanan.');
+        }
     }
 }

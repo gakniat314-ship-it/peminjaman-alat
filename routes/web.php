@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AlatController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\LogAktivitasController;
+use App\Http\Controllers\Admin\PengembalianController as AdminPengembalianController;
 use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Peminjam\KatalogController;
@@ -40,6 +41,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('kategori', KategoriController::class)->except('show');
         Route::resource('alat', AlatController::class)->except('show');
         Route::resource('transaksi', TransaksiController::class)->except('show');
+        Route::get('/pengembalian', [AdminPengembalianController::class, 'index'])->name('pengembalian.index');
+        Route::get('/pengembalian/create/{peminjaman}', [AdminPengembalianController::class, 'create'])->name('pengembalian.create');
+        Route::post('/pengembalian', [AdminPengembalianController::class, 'store'])->name('pengembalian.store');
+        Route::get('/pengembalian/{pengembalian}/edit', [AdminPengembalianController::class, 'edit'])->name('pengembalian.edit');
+        Route::put('/pengembalian/{pengembalian}', [AdminPengembalianController::class, 'update'])->name('pengembalian.update');
+        Route::delete('/pengembalian/{pengembalian}', [AdminPengembalianController::class, 'destroy'])->name('pengembalian.destroy');
         Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])->name('log-aktivitas.index');
     });
 

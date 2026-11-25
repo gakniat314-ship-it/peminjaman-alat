@@ -12,8 +12,16 @@
             <div><x-input-label for="role" value="Role" /><select id="role" name="role" class="mt-1 block w-full rounded-md border-gray-300" required @if ($user->is(auth()->user())) disabled @endif>
                 @foreach (['admin' => 'Admin', 'petugas' => 'Petugas', 'peminjam' => 'Peminjam'] as $value => $label)<option value="{{ $value }}" @selected(old('role', $user->role ?: 'peminjam') === $value)>{{ $label }}</option>@endforeach
             </select>@if ($user->is(auth()->user()))<input type="hidden" name="role" value="{{ $user->role }}">@endif</div>
-            <div><x-input-label for="password" :value="$user->exists ? 'Password baru (opsional)' : 'Password'" /><x-text-input id="password" name="password" type="password" class="mt-1 block w-full" @required(! $user->exists) autocomplete="new-password" /></div>
-            <div><x-input-label for="password_confirmation" value="Konfirmasi password" /><x-text-input id="password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" @required(! $user->exists) autocomplete="new-password" /></div>
+            <div>
+                <x-input-label for="password" :value="$user->exists ? 'Password baru (opsional)' : 'Password'" />
+                <input id="password" name="password" type="password" autocomplete="new-password" @if (! $user->exists) required @endif class="mt-1 block w-full rounded-xl border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            </div>
+            <div>
+                <x-input-label for="password_confirmation" value="Konfirmasi password" />
+                <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" @if (! $user->exists) required @endif class="mt-1 block w-full rounded-xl border-gray-300 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+            </div>
             <div class="flex gap-3"><x-primary-button>Simpan</x-primary-button><a href="{{ route('admin.users.index') }}" class="rounded-md border px-4 py-2 text-sm">Batal</a></div>
         </form>
     </div></div>
